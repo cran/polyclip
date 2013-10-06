@@ -1,0 +1,7 @@
+d2161a78addb288ff2406dee86ebbde8 *DESCRIPTION
+6b8bb3e4a88c3abc0e26a48e08aa849b *NAMESPACE
+11dad4c423aa50284c282ff9644da0ac *R/clipper.R
+29bd4c53dcca73baa86630b960375877 *man/polyclip.Rd
+827380b3a876e96a9da417745e5d46b7 *src/clipper.cpp
+93505f1a4436eed9a70dd83a5c25712d *src/clipper.h
+71a1ed74c0cf6c4e75f8bf65661d1749 *src/interface.cpp
