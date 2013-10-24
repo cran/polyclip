@@ -138,20 +138,22 @@ extern "C" {
     PROTECT(out  = NEW_LIST(m));
     
     // copy data
-    for(i = 0; i < m; i++) {
-      mi = result[i].size();
-      // Allocate space for output
-      PROTECT(outi = NEW_LIST(2));
-      PROTECT(xouti = NEW_INTEGER(mi));
-      PROTECT(youti = NEW_INTEGER(mi));
-      xx = INTEGER_POINTER(xouti);
-      yy = INTEGER_POINTER(youti);
-      // copy to output space
-      CopyFromPoly(result[i], xx, yy, mi, &mitrue);
-      // Put vectors into list
-      SET_VECTOR_ELT(outi, 0, xouti);
-      SET_VECTOR_ELT(outi, 1, youti);
-      SET_VECTOR_ELT(out, i, outi);
+    if(m > 0) {
+      for(i = 0; i < m; i++) {
+	mi = result[i].size();
+	// Allocate space for output
+	PROTECT(outi = NEW_LIST(2));
+	PROTECT(xouti = NEW_INTEGER(mi));
+	PROTECT(youti = NEW_INTEGER(mi));
+	xx = INTEGER_POINTER(xouti);
+	yy = INTEGER_POINTER(youti);
+	// copy to output space
+	CopyFromPoly(result[i], xx, yy, mi, &mitrue);
+	// Put vectors into list
+	SET_VECTOR_ELT(outi, 0, xouti);
+	SET_VECTOR_ELT(outi, 1, youti);
+	SET_VECTOR_ELT(out, i, outi);
+      }
     }
 
     UNPROTECT(6 + 3*m); // 5 arguments + out + m * (outi, xouti, youti)

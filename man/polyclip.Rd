@@ -22,7 +22,7 @@
   \item{fillA,fillB}{Polygon-filling rule for \code{A} and \code{B}.}
 }
 \value{
-  Data specifying polygons, in the same format as \code{A} and code{B}.
+  Data specifying polygons, in the same format as \code{A} and \code{B}.
 }
 \details{
   This is an interface to the polygon-clipping library
@@ -98,7 +98,7 @@
 \examples{
   A <- list(list(x=1:10, y=c(1:5,5:1)))
   B <- list(list(x=c(2,8,8,2),y=c(0,0,10,10)))
-  plot(c(0,10),c(0,10), type="n", axes=FALSE)
+  plot(c(0,10),c(0,10), type="n", axes=FALSE, xlab="", ylab="")
   polygon(A[[1]])
   polygon(B[[1]])
   C <- polyclip(A, B)
