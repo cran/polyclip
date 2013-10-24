@@ -60,8 +60,14 @@ enum PolyType { ptSubject, ptClip };
 //see http://glprogramming.com/red/chapter11.html
 enum PolyFillType { pftEvenOdd, pftNonZero, pftPositive, pftNegative };
 
+#ifdef POLYCLIP_LONG64
+// 64-bit types are determined from a configuration script
+typedef POLYCLIP_LONG64 long64;
+typedef POLYCLIP_ULONG64 ulong64;
+#else
 typedef signed long long long64;
 typedef unsigned long long ulong64;
+#endif
 
 struct IntPoint {
 public:
