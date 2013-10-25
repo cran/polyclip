@@ -1,22 +1,25 @@
-AC_INIT(polyclip,[0.0-7])
+AC_INIT(polyclip,[1.1-0])
+CXX=`"${R_HOME}/bin/R" CMD config CXX`
+CXXFLAGS=`"${R_HOME}/bin/R" CMD config CXXFLAGS`
+CPPFLAGS=`"${R_HOME}/bin/R" CMD config CPPFLAGS`
 dnl Check for availability of 64-bit integer types in C++
 AC_LANG([C++])
 dnl Signed 64-bit integer 
 long64=""
 name64="signed 64-bit integers (long64)"
-AC_CHECK_TYPES([[int64_t]],[long64="int64_t"],[],[[#include <cstdlib>]])
+AC_CHECK_TYPES([int64_t],[long64="int64_t"],[],[#include <stdint.h>])
 if test "${long64}" != ""; then
   POLYCLIP_LONG64="${long64}"
 else
-  AC_CHECK_TYPES([[int_fast64_t]],[long64="int_fast64_t"],[],[[#include <cstdlib>]])
+  AC_CHECK_TYPES([int_fast64_t],[long64="int_fast64_t"],[],[#include <stdint.h>])
   if test "${long64}" != ""; then
     POLYCLIP_LONG64="${long64}" 
   else
-    AC_CHECK_TYPES([[int_least64_t]],[long64="int_least64_t"],[],[[#include <cstdlib>]])
+    AC_CHECK_TYPES([int_least64_t],[long64="int_least64_t"],[],[#include <stdint.h>])
     if test "${long64}" != ""; then
       POLYCLIP_LONG64="${long64}" 
     else				  
-      AC_CHECK_TYPES([[long long]],[long64="long long"],[],[[#include <cstdlib>]])
+      AC_CHECK_TYPES([long long],[long64="long long"])
       if test "${long64}" != ""; then
         POLYCLIP_LONG64="${long64}" 
       else
@@ -31,19 +34,19 @@ echo "     will be declared as '${long64}'"
 dnl Unsigned 64-bit integer 
 ulong64=""
 uname64="unsigned 64-bit integers (ulong64)"
-AC_CHECK_TYPES([[uint64_t]],[ulong64="uint64_t"],[],[[#include <cstdlib>]])
+AC_CHECK_TYPES([uint64_t],[ulong64="uint64_t"],[],[#include <stdint.h>])
 if test "${ulong64}" != ""; then
   POLYCLIP_ULONG64="${ulong64}" 
 else 
-  AC_CHECK_TYPES([[uint_fast64_t]],[ulong64="uint_fast64_t"],[],[[#include <cstdlib>]])
+  AC_CHECK_TYPES([uint_fast64_t],[ulong64="uint_fast64_t"],[],[#include <stdint.h>])
   if test "${ulong64}" != ""; then
     POLYCLIP_ULONG64="${ulong64}" 
   else 
-    AC_CHECK_TYPES([[uint_least64_t]],[ulong64="uint_least64_t"],[],[[#include <cstdlib>]])
+    AC_CHECK_TYPES([uint_least64_t],[ulong64="uint_least64_t"],[],[#include <stdint.h>])
     if test "${ulong64}" != ""; then
       POLYCLIP_ULONG64="${ulong64}" 
     else 
-      AC_CHECK_TYPES([[unsigned long long]],[ulong64="unsigned long long"],[],[[#include <cstdlib>]])
+      AC_CHECK_TYPES([unsigned long long],[ulong64="unsigned long long"])
       if test "${ulong64}" != ""; then
         POLYCLIP_ULONG64="${ulong64}" 
       else
