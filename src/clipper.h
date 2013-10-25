@@ -61,10 +61,12 @@ enum PolyType { ptSubject, ptClip };
 enum PolyFillType { pftEvenOdd, pftNonZero, pftPositive, pftNegative };
 
 #ifdef POLYCLIP_LONG64
-// 64-bit types are determined from a configuration script
+// 64-bit types in <stdint.h> are found using a configuration script 
+#include <stdint.h>
 typedef POLYCLIP_LONG64 long64;
 typedef POLYCLIP_ULONG64 ulong64;
 #else
+// e.g. Windows
 typedef signed long long long64;
 typedef unsigned long long ulong64;
 #endif
