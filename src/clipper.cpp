@@ -269,7 +269,7 @@ class Int128
 #ifndef R_PACKAGE
         throw "Int128 operator/: divide by zero";
 #else
-      error("clippeR exception: Int128 operator/: divide by zero");
+      error("polyclip exception: Int128 operator/: divide by zero");
 #endif
 
       bool negate = (rhs.hi < 0) != (hi < 0);
@@ -852,7 +852,7 @@ OutPt* InsertPolyPtBetween(OutPt* p1, OutPt* p2, const IntPoint pt)
 #ifndef R_PACKAGE
   if (p1 == p2) throw "JoinError";
 #else
-  if (p1 == p2) error("clippeR exception: JoinError");
+  if (p1 == p2) error("polyclip exception: JoinError");
 #endif
   OutPt* result = new OutPt;
   result->pt = pt;
@@ -898,7 +898,7 @@ void RangeTest(const IntPoint& pt, long64& maxrange)
 #ifndef R_PACKAGE
       throw coords_range_error;
 #else
-    error("clippeR exception: coords_range_error");
+    error("polyclip exception: coords_range_error");
 #endif
     else maxrange = hiRange;
   }
@@ -908,7 +908,7 @@ void RangeTest(const IntPoint& pt, long64& maxrange)
 #ifndef R_PACKAGE
       throw coords_range_error;
 #else
-    error("clippeR exception: coords_range_error");
+    error("polyclip exception: coords_range_error");
 #endif
     else maxrange = hiRange;
   }
@@ -1738,7 +1738,7 @@ void Clipper::InsertLocalMinimaIntoAEL(const long64 botY)
 #ifndef R_PACKAGE
 	if(!e) throw clipperException("InsertLocalMinimaIntoAEL: missing rightbound!");
 #else
-	if(!e) error("clippeR exception: InsertLocalMinimaIntoAEL: missing rightbound!");
+	if(!e) error("polyclip exception: InsertLocalMinimaIntoAEL: missing rightbound!");
 #endif
         //nb: For calculating winding counts etc, IntersectEdges() assumes
         //that param1 will be to the right of param2 ABOVE the intersection ...
@@ -2339,7 +2339,7 @@ void Clipper::ProcessHorizontal(TEdge *horzEdge)
 #ifndef R_PACKAGE
         if (eMaxPair->outIdx >= 0) throw clipperException("ProcessHorizontal error");
 #else 
-        if (eMaxPair->outIdx >= 0) error("clippeR exception: ProcessHorizontal error");
+        if (eMaxPair->outIdx >= 0) error("polyclip exception: ProcessHorizontal error");
 #endif
         return;
       }
@@ -2387,7 +2387,7 @@ void Clipper::ProcessHorizontal(TEdge *horzEdge)
 #ifndef R_PACKAGE
     if (eMaxPair->outIdx >= 0) throw clipperException("ProcessHorizontal error");
 #else
-    if (eMaxPair->outIdx >= 0) error("clippeR exception: ProcessHorizontal error");
+    if (eMaxPair->outIdx >= 0) error("polyclip exception: ProcessHorizontal error");
 #endif
     DeleteFromAEL(eMaxPair);
     DeleteFromAEL(horzEdge);
@@ -2401,7 +2401,7 @@ void Clipper::UpdateEdgeIntoAEL(TEdge *&e)
   if( !e->nextInLML ) throw
     clipperException("UpdateEdgeIntoAEL: invalid call");
 #else
-  if( !e->nextInLML ) error("clippeR exception: UpdateEdgeIntoAEL: invalid call");
+  if( !e->nextInLML ) error("polyclip exception: UpdateEdgeIntoAEL: invalid call");
 #endif
   TEdge* AelPrev = e->prevInAEL;
   TEdge* AelNext = e->nextInAEL;
@@ -2435,7 +2435,7 @@ bool Clipper::ProcessIntersections(const long64 botY, const long64 topY)
 #ifndef R_PACKAGE
     throw clipperException("ProcessIntersections error");
 #else
-    error("clippeR exception: ProcessIntersections error");
+    error("polyclip exception: ProcessIntersections error");
 #endif
   }
   m_SortedEdges = 0;
@@ -2485,7 +2485,7 @@ void Clipper::BuildIntersectList(const long64 botY, const long64 topY)
 #ifndef R_PACKAGE
           throw clipperException("Intersection error");
 #else
-   	  error("clippeR exception: Intersection error");
+   	  error("polyclip exception: Intersection error");
 #endif
         if (pt.Y > botY)
         {
@@ -2557,7 +2557,7 @@ void Clipper::DoMaxima(TEdge *e, long64 topY)
 #ifndef R_PACKAGE
     if (!eNext) throw clipperException("DoMaxima error");
 #else
-    if (!eNext) error("clippeR exception: DoMaxima error");
+    if (!eNext) error("polyclip exception: DoMaxima error");
 #endif
     IntersectEdges( e, eNext, IntPoint(X, topY), ipBoth );
     SwapPositionsInAEL(e, eNext);
@@ -2575,7 +2575,7 @@ void Clipper::DoMaxima(TEdge *e, long64 topY)
 #ifndef R_PACKAGE
   else throw clipperException("DoMaxima error");
 #else
-  else error("clippeR exception: DoMaxima error");
+  else error("polyclip exception: DoMaxima error");
 #endif
 }
 //------------------------------------------------------------------------------
