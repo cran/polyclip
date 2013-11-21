@@ -89,7 +89,7 @@ extern "C" {
       cliptype = ctXor;
       break;
     default: 
-      error("clippeR: unrecognised code for cliptype");
+      error("polyclip: unrecognised code for cliptype");
     }
     switch(pftAcode) {
     case 1: 
@@ -105,7 +105,7 @@ extern "C" {
       filltypeA = pftNegative;
       break;
     default: 
-      error("clippeR: unrecognised code for fill type A");
+      error("polyclip: unrecognised code for fill type A");
     }
     switch(pftBcode) {
     case 1: 
@@ -121,7 +121,7 @@ extern "C" {
       filltypeB = pftNegative;
       break;
     default: 
-      error("clippeR: unrecognised code for fill type B");
+      error("polyclip: unrecognised code for fill type B");
     }
 
     // perform clipping operation
@@ -160,3 +160,204 @@ extern "C" {
     return(out);
   }
 }
+
+// offset (dilation) operation for closed polygons
+
+extern "C" {
+  SEXP Cpolyoffset(SEXP A,
+		   SEXP del,
+		   SEXP jt,
+		   SEXP lim
+		 ){ 
+    int nA, i, n, m, mi, mitrue;
+    int *x, *y, *xx, *yy;
+    SEXP Ai = R_NilValue;
+    SEXP out, outi, xouti, youti;
+    JoinType jointype;
+    int jtcode;
+    double delta, limit;
+    
+    // protect arguments from garbage collector    
+    PROTECT(A   = AS_LIST(A));
+    PROTECT(del = AS_NUMERIC(del));
+    PROTECT(jt  = AS_INTEGER(jt));
+    PROTECT(lim = AS_NUMERIC(lim));
+
+    // length of list
+    nA = LENGTH(A);
+
+    // Initialise object containing nA polygons
+    Polygons polyA(nA);
+
+    // copy data
+    for(i = 0; i < nA; i++) {
+      Ai = VECTOR_ELT(A, i);
+      n = LENGTH(VECTOR_ELT(Ai, 0));
+      x = INTEGER(VECTOR_ELT(Ai, 0));
+      y = INTEGER(VECTOR_ELT(Ai, 1));
+      CopyToPoly(x, y, n, polyA[i]);
+    }
+
+    // interpret offset parameters
+    jtcode = *(INTEGER_POINTER(jt));
+    switch(jtcode) {
+    case 1: 
+      jointype = jtSquare; 
+      break;
+    case 2:
+      jointype = jtRound;
+      break;
+    case 3:
+      jointype = jtMiter;
+      break;
+    default: 
+      error("polyclip: unrecognised code for jointype");
+    }
+    delta = *(NUMERIC_POINTER(del));
+    limit = *(NUMERIC_POINTER(lim));
+
+    // perform offset operation
+    Polygons result;
+    OffsetPolygons(polyA, result, delta, jointype, limit, true);
+
+    // number of polygons
+    m = result.size();
+    
+    // initialise output list
+    PROTECT(out  = NEW_LIST(m));
+    
+    // copy data
+    if(m > 0) {
+      for(i = 0; i < m; i++) {
+	mi = result[i].size();
+	// Allocate space for output
+	PROTECT(outi = NEW_LIST(2));
+	PROTECT(xouti = NEW_INTEGER(mi));
+	PROTECT(youti = NEW_INTEGER(mi));
+	xx = INTEGER_POINTER(xouti);
+	yy = INTEGER_POINTER(youti);
+	// copy to output space
+	CopyFromPoly(result[i], xx, yy, mi, &mitrue);
+	// Put vectors into list
+	SET_VECTOR_ELT(outi, 0, xouti);
+	SET_VECTOR_ELT(outi, 1, youti);
+	SET_VECTOR_ELT(out, i, outi);
+      }
+    }
+
+    UNPROTECT(5 + 3*m); // 4 arguments + out + m * (outi, xouti, youti)
+    return(out);
+  }
+}
+
+
+// offset (dilation) operation for polygonal lines
+
+extern "C" {
+  SEXP Clineoffset(SEXP A,
+		   SEXP del,
+		   SEXP jt,
+		   SEXP et,
+		   SEXP lim
+		 ){ 
+    int nA, i, n, m, mi, mitrue;
+    int *x, *y, *xx, *yy;
+    SEXP Ai = R_NilValue;
+    SEXP out, outi, xouti, youti;
+    JoinType jointype;
+    EndType endtype;
+    int jtcode, etcode;
+    double delta, limit;
+    
+    // protect arguments from garbage collector    
+    PROTECT(A   = AS_LIST(A));
+    PROTECT(del = AS_NUMERIC(del));
+    PROTECT(jt  = AS_INTEGER(jt));
+    PROTECT(et  = AS_INTEGER(et));
+    PROTECT(lim = AS_NUMERIC(lim));
+
+    // length of list
+    nA = LENGTH(A);
+
+    // Initialise object containing nA polygonal lines
+    Polygons polyA(nA);
+
+    // copy data
+    for(i = 0; i < nA; i++) {
+      Ai = VECTOR_ELT(A, i);
+      n = LENGTH(VECTOR_ELT(Ai, 0));
+      x = INTEGER(VECTOR_ELT(Ai, 0));
+      y = INTEGER(VECTOR_ELT(Ai, 1));
+      CopyToPoly(x, y, n, polyA[i]);
+    }
+
+    // interpret offset parameters
+    jtcode = *(INTEGER_POINTER(jt));
+    switch(jtcode) {
+    case 1: 
+      jointype = jtSquare; 
+      break;
+    case 2:
+      jointype = jtRound;
+      break;
+    case 3:
+      jointype = jtMiter;
+      break;
+    default: 
+      error("polyclip: unrecognised code for jointype");
+    }
+    etcode = *(INTEGER_POINTER(et));
+    switch(etcode) {
+    case 1: 
+      endtype = etClosed; 
+      break;
+    case 2:
+      endtype = etButt;
+      break;
+    case 3:
+      endtype = etSquare;
+      break;
+    case 4:
+      endtype = etRound;
+      break;
+    default: 
+      error("polyclip: unrecognised code for endtype");
+    }
+    delta = *(NUMERIC_POINTER(del));
+    limit = *(NUMERIC_POINTER(lim));
+
+    // perform offset operation
+    Polygons result;
+    OffsetPolyLines(polyA, result, delta, jointype, endtype, limit, true);
+
+    // number of polygons
+    m = result.size();
+    
+    // initialise output list
+    PROTECT(out  = NEW_LIST(m));
+    
+    // copy data
+    if(m > 0) {
+      for(i = 0; i < m; i++) {
+	mi = result[i].size();
+	// Allocate space for output
+	PROTECT(outi = NEW_LIST(2));
+	PROTECT(xouti = NEW_INTEGER(mi));
+	PROTECT(youti = NEW_INTEGER(mi));
+	xx = INTEGER_POINTER(xouti);
+	yy = INTEGER_POINTER(youti);
+	// copy to output space
+	CopyFromPoly(result[i], xx, yy, mi, &mitrue);
+	// Put vectors into list
+	SET_VECTOR_ELT(outi, 0, xouti);
+	SET_VECTOR_ELT(outi, 1, youti);
+	SET_VECTOR_ELT(out, i, outi);
+      }
+    }
+
+    UNPROTECT(6 + 3*m); // 5 arguments + out + m * (outi, xouti, youti)
+    return(out);
+  }
+}
+
+
