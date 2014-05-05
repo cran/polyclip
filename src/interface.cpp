@@ -5,7 +5,7 @@
 using namespace std;
 using namespace ClipperLib;
 
-void CopyToPoly(int *x, int *y, int n, ClipperLib::Polygon &p)
+void CopyToPath(int *x, int *y, int n, ClipperLib::Path &p)
 {
   p.clear();
   p.reserve(n);
@@ -13,7 +13,7 @@ void CopyToPoly(int *x, int *y, int n, ClipperLib::Polygon &p)
     p.push_back(IntPoint(x[i], y[i]));
 }
 
-void CopyFromPoly(ClipperLib::Polygon &p, int *x, int *y, int nmax, int *n)
+void CopyFromPath(ClipperLib::Path &p, int *x, int *y, int nmax, int *n)
 {
   int N;
   *n = N = p.size();
@@ -26,20 +26,52 @@ void CopyFromPoly(ClipperLib::Polygon &p, int *x, int *y, int nmax, int *n)
   }
 }
 
+void ScaleToPath(double *x, double *y, int n, ClipperLib::Path &p,
+                 double x0, double y0, double eps)
+{
+  int i;
+  cInt cxi, cyi;
+  p.clear();
+  p.reserve(n);
+  for (i = 0; i < n; i++) {
+    cxi = (cInt) ((x[i] - x0)/eps);
+    cyi = (cInt) ((y[i] - y0)/eps);
+    p.push_back(IntPoint(cxi, cyi));
+  }
+}
+
+void ScaleFromPath(ClipperLib::Path &p, double *x, double *y, int nmax, int *n,
+		  double x0, double y0, double eps)
+{
+  int N;
+  *n = N = p.size();
+  if(N <= nmax) {
+    for (int i = 0; i < N; i++) 
+      {
+	x[i] = x0 + eps * ((double) p[i].X);
+	y[i] = y0 + eps * ((double) p[i].Y);
+      }
+  }
+}
+
 extern "C" {
   SEXP Cclipbool(SEXP A,
 		 SEXP B,
 		 SEXP pftA,
 		 SEXP pftB,
-		 SEXP ct
+		 SEXP ct,
+		 SEXP X0,
+                 SEXP Y0,
+                 SEXP Eps
 		 ){ 
     int nA, nB, i, n, m, mi, mitrue;
-    int *x, *y, *xx, *yy;
+    double *x, *y, *xx, *yy;
     SEXP Ai = R_NilValue, Bi = R_NilValue;
     SEXP out, outi, xouti, youti;
     ClipType cliptype;
     PolyFillType filltypeA, filltypeB;
     int ctcode, pftAcode, pftBcode;
+    double x0, y0, eps;
     
     // protect arguments from garbage collector    
     PROTECT(A   = AS_LIST(A));
@@ -47,28 +79,36 @@ extern "C" {
     PROTECT(ct  = AS_INTEGER(ct));
     PROTECT(pftA  = AS_INTEGER(pftA));
     PROTECT(pftB  = AS_INTEGER(pftB));
+    PROTECT(X0  = AS_NUMERIC(X0));
+    PROTECT(Y0  = AS_NUMERIC(Y0));
+    PROTECT(Eps = AS_NUMERIC(Eps));
 
     // lengths of lists
     nA = LENGTH(A);
     nB = LENGTH(B);
 
     // Initialise object containing n polygons
-    Polygons polyA(nA), polyB(nB);
+    Paths polyA(nA), polyB(nB);
+
+    // Get scale parameters
+    x0 = *(NUMERIC_POINTER(X0));
+    y0 = *(NUMERIC_POINTER(Y0));
+    eps = *(NUMERIC_POINTER(Eps));
 
     // copy data
     for(i = 0; i < nA; i++) {
       Ai = VECTOR_ELT(A, i);
       n = LENGTH(VECTOR_ELT(Ai, 0));
-      x = INTEGER(VECTOR_ELT(Ai, 0));
-      y = INTEGER(VECTOR_ELT(Ai, 1));
-      CopyToPoly(x, y, n, polyA[i]);
+      x = NUMERIC_POINTER(VECTOR_ELT(Ai, 0));
+      y = NUMERIC_POINTER(VECTOR_ELT(Ai, 1));
+      ScaleToPath(x, y, n, polyA[i], x0, y0, eps);
     }
     for(i = 0; i < nB; i++) {
       Bi = VECTOR_ELT(B, i);
       n = LENGTH(VECTOR_ELT(Bi, 0));
-      x = INTEGER(VECTOR_ELT(Bi, 0));
-      y = INTEGER(VECTOR_ELT(Bi, 1));
-      CopyToPoly(x, y, n, polyB[i]);
+      x = NUMERIC_POINTER(VECTOR_ELT(Bi, 0));
+      y = NUMERIC_POINTER(VECTOR_ELT(Bi, 1));
+      ScaleToPath(x, y, n, polyB[i], x0, y0, eps);
     }
 
     // interpret clipping parameters
@@ -126,9 +166,9 @@ extern "C" {
 
     // perform clipping operation
     Clipper c;
-    Polygons result;
-    c.AddPolygons(polyA, ptSubject);
-    c.AddPolygons(polyB, ptClip);
+    Paths result;
+    c.AddPaths(polyA, ptSubject, true);
+    c.AddPaths(polyB, ptClip, true);
     c.Execute(cliptype, result, filltypeA, filltypeB);
 
     // number of polygons
@@ -143,12 +183,12 @@ extern "C" {
 	mi = result[i].size();
 	// Allocate space for output
 	PROTECT(outi = NEW_LIST(2));
-	PROTECT(xouti = NEW_INTEGER(mi));
-	PROTECT(youti = NEW_INTEGER(mi));
-	xx = INTEGER_POINTER(xouti);
-	yy = INTEGER_POINTER(youti);
+	PROTECT(xouti = NEW_NUMERIC(mi));
+	PROTECT(youti = NEW_NUMERIC(mi));
+	xx = NUMERIC_POINTER(xouti);
+	yy = NUMERIC_POINTER(youti);
 	// copy to output space
-	CopyFromPoly(result[i], xx, yy, mi, &mitrue);
+	ScaleFromPath(result[i], xx, yy, mi, &mitrue, x0, y0, eps);
 	// Put vectors into list
 	SET_VECTOR_ELT(outi, 0, xouti);
 	SET_VECTOR_ELT(outi, 1, youti);
@@ -156,7 +196,7 @@ extern "C" {
       }
     }
 
-    UNPROTECT(6 + 3*m); // 5 arguments + out + m * (outi, xouti, youti)
+    UNPROTECT(9 + 3*m); // 8 arguments + out + m * (outi, xouti, youti)
     return(out);
   }
 }
@@ -167,35 +207,49 @@ extern "C" {
   SEXP Cpolyoffset(SEXP A,
 		   SEXP del,
 		   SEXP jt,
-		   SEXP lim
+		   SEXP mlim,
+		   SEXP atol,
+		   SEXP X0,
+		   SEXP Y0,
+		   SEXP Eps
 		 ){ 
     int nA, i, n, m, mi, mitrue;
-    int *x, *y, *xx, *yy;
+    double *x, *y, *xx, *yy;
     SEXP Ai = R_NilValue;
     SEXP out, outi, xouti, youti;
     JoinType jointype;
     int jtcode;
-    double delta, limit;
+    double delta, miterlimit, arctolerance;
+    double x0, y0, eps;
     
     // protect arguments from garbage collector    
     PROTECT(A   = AS_LIST(A));
     PROTECT(del = AS_NUMERIC(del));
     PROTECT(jt  = AS_INTEGER(jt));
-    PROTECT(lim = AS_NUMERIC(lim));
+    PROTECT(mlim = AS_NUMERIC(mlim));
+    PROTECT(atol = AS_NUMERIC(atol));
+    PROTECT(X0  = AS_NUMERIC(X0));
+    PROTECT(Y0  = AS_NUMERIC(Y0));
+    PROTECT(Eps = AS_NUMERIC(Eps));
 
     // length of list
     nA = LENGTH(A);
 
     // Initialise object containing nA polygons
-    Polygons polyA(nA);
+    Paths polyA(nA);
+
+    // Get scale parameters
+    x0 = *(NUMERIC_POINTER(X0));
+    y0 = *(NUMERIC_POINTER(Y0));
+    eps = *(NUMERIC_POINTER(Eps));
 
     // copy data
     for(i = 0; i < nA; i++) {
       Ai = VECTOR_ELT(A, i);
       n = LENGTH(VECTOR_ELT(Ai, 0));
-      x = INTEGER(VECTOR_ELT(Ai, 0));
-      y = INTEGER(VECTOR_ELT(Ai, 1));
-      CopyToPoly(x, y, n, polyA[i]);
+      x = NUMERIC_POINTER(VECTOR_ELT(Ai, 0));
+      y = NUMERIC_POINTER(VECTOR_ELT(Ai, 1));
+      ScaleToPath(x, y, n, polyA[i], x0, y0, eps);
     }
 
     // interpret offset parameters
@@ -213,12 +267,22 @@ extern "C" {
     default: 
       error("polyclip: unrecognised code for jointype");
     }
-    delta = *(NUMERIC_POINTER(del));
-    limit = *(NUMERIC_POINTER(lim));
+
+    // get parameters
+    delta = *(NUMERIC_POINTER(del));   // absolute distance
+    miterlimit = *(NUMERIC_POINTER(mlim));   // multiple of 'delta'
+    arctolerance = *(NUMERIC_POINTER(atol));   // absolute distance
+    // rescale
+    delta = delta/eps;
+    arctolerance = arctolerance/eps;
 
     // perform offset operation
-    Polygons result;
-    OffsetPolygons(polyA, result, delta, jointype, limit, true);
+    ClipperOffset co;
+    Paths result;
+    co.AddPaths(polyA, jointype, etClosedPolygon);
+    co.MiterLimit = miterlimit;
+    co.ArcTolerance = arctolerance;
+    co.Execute(result, delta);
 
     // number of polygons
     m = result.size();
@@ -232,12 +296,12 @@ extern "C" {
 	mi = result[i].size();
 	// Allocate space for output
 	PROTECT(outi = NEW_LIST(2));
-	PROTECT(xouti = NEW_INTEGER(mi));
-	PROTECT(youti = NEW_INTEGER(mi));
-	xx = INTEGER_POINTER(xouti);
-	yy = INTEGER_POINTER(youti);
+	PROTECT(xouti = NEW_NUMERIC(mi));
+	PROTECT(youti = NEW_NUMERIC(mi));
+	xx = NUMERIC_POINTER(xouti);
+	yy = NUMERIC_POINTER(youti);
 	// copy to output space
-	CopyFromPoly(result[i], xx, yy, mi, &mitrue);
+	ScaleFromPath(result[i], xx, yy, mi, &mitrue, x0, y0, eps);
 	// Put vectors into list
 	SET_VECTOR_ELT(outi, 0, xouti);
 	SET_VECTOR_ELT(outi, 1, youti);
@@ -245,7 +309,7 @@ extern "C" {
       }
     }
 
-    UNPROTECT(5 + 3*m); // 4 arguments + out + m * (outi, xouti, youti)
+    UNPROTECT(9 + 3*m); // 8 arguments + out + m * (outi, xouti, youti)
     return(out);
   }
 }
@@ -258,37 +322,51 @@ extern "C" {
 		   SEXP del,
 		   SEXP jt,
 		   SEXP et,
-		   SEXP lim
-		 ){ 
+		   SEXP mlim,
+		   SEXP atol,
+		   SEXP X0,
+		   SEXP Y0,
+		   SEXP Eps
+	 ){ 
     int nA, i, n, m, mi, mitrue;
-    int *x, *y, *xx, *yy;
+    double *x, *y, *xx, *yy;
     SEXP Ai = R_NilValue;
     SEXP out, outi, xouti, youti;
     JoinType jointype;
     EndType endtype;
     int jtcode, etcode;
-    double delta, limit;
+    double delta, miterlimit, arctolerance;
+    double x0, y0, eps;
     
     // protect arguments from garbage collector    
     PROTECT(A   = AS_LIST(A));
     PROTECT(del = AS_NUMERIC(del));
     PROTECT(jt  = AS_INTEGER(jt));
     PROTECT(et  = AS_INTEGER(et));
-    PROTECT(lim = AS_NUMERIC(lim));
+    PROTECT(mlim = AS_NUMERIC(mlim));
+    PROTECT(atol = AS_NUMERIC(atol));
+    PROTECT(X0  = AS_NUMERIC(X0));
+    PROTECT(Y0  = AS_NUMERIC(Y0));
+    PROTECT(Eps = AS_NUMERIC(Eps));
 
     // length of list
     nA = LENGTH(A);
 
     // Initialise object containing nA polygonal lines
-    Polygons polyA(nA);
+    Paths polyA(nA);
+
+    // Get scale parameters
+    x0 = *(NUMERIC_POINTER(X0));
+    y0 = *(NUMERIC_POINTER(Y0));
+    eps = *(NUMERIC_POINTER(Eps));
 
     // copy data
     for(i = 0; i < nA; i++) {
       Ai = VECTOR_ELT(A, i);
       n = LENGTH(VECTOR_ELT(Ai, 0));
-      x = INTEGER(VECTOR_ELT(Ai, 0));
-      y = INTEGER(VECTOR_ELT(Ai, 1));
-      CopyToPoly(x, y, n, polyA[i]);
+      x = NUMERIC_POINTER(VECTOR_ELT(Ai, 0));
+      y = NUMERIC_POINTER(VECTOR_ELT(Ai, 1));
+      ScaleToPath(x, y, n, polyA[i], x0, y0, eps);
     }
 
     // interpret offset parameters
@@ -309,26 +387,39 @@ extern "C" {
     etcode = *(INTEGER_POINTER(et));
     switch(etcode) {
     case 1: 
-      endtype = etClosed; 
+      endtype = etClosedPolygon; 
       break;
     case 2:
-      endtype = etButt;
+      endtype = etClosedLine;
       break;
     case 3:
-      endtype = etSquare;
+      endtype = etOpenButt;
       break;
     case 4:
-      endtype = etRound;
+      endtype = etOpenSquare;
+      break;
+    case 5:
+      endtype = etOpenRound;
       break;
     default: 
       error("polyclip: unrecognised code for endtype");
     }
-    delta = *(NUMERIC_POINTER(del));
-    limit = *(NUMERIC_POINTER(lim));
+
+    // get parameters
+    delta = *(NUMERIC_POINTER(del));   // absolute distance
+    miterlimit = *(NUMERIC_POINTER(mlim));   // multiple of 'delta'
+    arctolerance = *(NUMERIC_POINTER(atol));   // absolute distance
+    // rescale
+    delta = delta/eps;
+    arctolerance = arctolerance/eps;
 
     // perform offset operation
-    Polygons result;
-    OffsetPolyLines(polyA, result, delta, jointype, endtype, limit, true);
+    ClipperOffset co;
+    Paths result;
+    co.AddPaths(polyA, jointype, endtype);
+    co.MiterLimit = miterlimit;
+    co.ArcTolerance = arctolerance;
+    co.Execute(result, delta);
 
     // number of polygons
     m = result.size();
@@ -342,12 +433,12 @@ extern "C" {
 	mi = result[i].size();
 	// Allocate space for output
 	PROTECT(outi = NEW_LIST(2));
-	PROTECT(xouti = NEW_INTEGER(mi));
-	PROTECT(youti = NEW_INTEGER(mi));
-	xx = INTEGER_POINTER(xouti);
-	yy = INTEGER_POINTER(youti);
+	PROTECT(xouti = NEW_NUMERIC(mi));
+	PROTECT(youti = NEW_NUMERIC(mi));
+	xx = NUMERIC_POINTER(xouti);
+	yy = NUMERIC_POINTER(youti);
 	// copy to output space
-	CopyFromPoly(result[i], xx, yy, mi, &mitrue);
+	ScaleFromPath(result[i], xx, yy, mi, &mitrue, x0, y0, eps);
 	// Put vectors into list
 	SET_VECTOR_ELT(outi, 0, xouti);
 	SET_VECTOR_ELT(outi, 1, youti);
@@ -355,7 +446,7 @@ extern "C" {
       }
     }
 
-    UNPROTECT(6 + 3*m); // 5 arguments + out + m * (outi, xouti, youti)
+    UNPROTECT(10 + 3*m); // 9 arguments + out + m * (outi, xouti, youti)
     return(out);
   }
 }

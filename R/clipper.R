@@ -3,18 +3,8 @@
 #
 # Interface to Clipper C++ code
 #
-#  $Revision: 1.8 $ $Date: 2013/11/20 04:40:21 $
+#  $Revision: 1.9 $ $Date: 2014/05/05 10:31:06 $
 #
-
-preprocess <- function(z, eps, x0, y0) {
-  list(x = as.integer(round((z$x-x0)/eps)),
-       y = as.integer(round((z$y-y0)/eps)))
-}
-
-postprocess <- function(z, eps, x0, y0) {
-  list(x = x0 + eps * z[[1]],
-       y = y0 + eps * z[[2]])
-}
 
 validxy <- function(P) {
   is.list(P) && all(c("x","y") %in% names(P)) &&
@@ -27,7 +17,14 @@ validpoly <- function(P) {
 
 xrange <- function(z) { range(z$x) }
 yrange <- function(z) { range(z$y) }
-  
+
+ensurexydouble <- function(P) lapply(P[c("x", "y")],
+                                     "storage.mode<-", value="double")
+
+ensuredouble <- function(A) lapply(A, ensurexydouble)
+
+aspolygonlist <- function(A) lapply(A, "names<-", value=c("x", "y"))
+
 polyclip <-
   function(A, B, 
            op=c("intersection", "union", "minus", "xor"),
@@ -62,22 +59,22 @@ polyclip <-
       if(missing(x0)) x0 <- mean(xr)
       if(missing(y0)) y0 <- mean(yr)
     } 
-    # rescale and convert to integers
-    A <- lapply(A, preprocess, eps=eps, x0=x0, y0=y0)
-    B <- lapply(B, preprocess, eps=eps, x0=x0, y0=y0)
     # call clipper library
+    A <- ensuredouble(A)
+    B <- ensuredouble(B)
     storage.mode(ct) <- storage.mode(pftA) <- storage.mode(pftB) <- "integer"
+    storage.mode(x0) <- storage.mode(y0) <- storage.mode(eps) <- "double"
     ans <- .Call("Cclipbool",
-                 A, B, pftA, pftB, ct)
-    ans <- lapply(ans, postprocess, eps=eps, x0=x0, y0=y0)
-    return(ans)
+                 A, B, pftA, pftB, ct,
+                 x0, y0, eps)
+    return(aspolygonlist(ans))
   }
 
 polyoffset <-
   function(A, delta, 
            ...,
            eps, x0, y0,
-           limit, 
+           miterlim=2, arctol=abs(delta)/100,
            jointype = c("square", "round", "miter")
            ) {
     # validate parameters and convert to integer codes
@@ -96,32 +93,17 @@ polyoffset <-
       if(missing(x0)) x0 <- mean(xr)
       if(missing(y0)) y0 <- mean(yr)
     }
-    switch(jointype,
-           square = {
-             # limit is ignored
-             limit <- lim <- 1
-           },
-           round = {
-             # limit is max tolerance (absolute distance)
-             if(missing(limit))
-               limit <- delta/1000
-             lim <- max(0.5, limit/eps)
-           },
-           miter = {
-               # limit is a multiple of delta
-             if(missing(limit))
-               limit <- 2
-             lim <- limit
-           })
-    # rescale and convert vertex coordinates to integers
-    A <- lapply(A, preprocess, eps=eps, x0=x0, y0=y0)
-    del <- delta/eps
+    # arc tolerance
+    arctol <- max(eps/4, arctol)
     # call clipper library
+    A <- ensuredouble(A)
     storage.mode(jt) <- "integer"
-    storage.mode(del) <- storage.mode(lim) <- "double"
-    ans <- .Call("Cpolyoffset", A, del, jt, lim)
-    ans <- lapply(ans, postprocess, eps=eps, x0=x0, y0=y0)
-    return(ans)
+    storage.mode(delta) <-
+      storage.mode(miterlim) <- storage.mode(arctol) <- "double"
+    storage.mode(x0) <- storage.mode(y0) <- storage.mode(eps) <- "double"
+    ans <- .Call("Cpolyoffset", A, delta, jt,
+                 miterlim, arctol, x0, y0, eps)
+    return(aspolygonlist(ans))
   }
 
 
@@ -129,20 +111,29 @@ polylineoffset <-
   function(A, delta, 
            ...,
            eps, x0, y0,
-           limit, 
+           miterlim=2, arctol=abs(delta)/100,
            jointype = c("square", "round", "miter"),
-           endtype = c("butt", "square", "round")
+           endtype = c("closedpolygon", "closedline",
+             "openbutt", "opensquare", "openround",
+             "closed", "butt", "square", "round")
            ) {
-    # validate parameters and convert to integer codes
+    ## validate parameters and convert to integer codes
     jointype <- match.arg(jointype)
-    jt <- match(jointype, c("square", "round", "miter")) 
-    et <- match(endtype, c("closed", "butt", "square", "round")) # SIC
-    # validate polygons and rescale
+    jt <- match(jointype, c("square", "round", "miter"))
+
+    endtype <- match.arg(endtype)
+    if(endtype == "closed") endtype <- "closedpolygon"
+    if(endtype %in% c("butt", "square", "round"))
+      endtype <- paste0("open", endtype)
+    et <- match(endtype, c("closedpolygon", "closedline",
+                           "openbutt", "opensquare", "openround"))
+    
+    ## validate polygons and rescale
     if(!validpoly(A)) {
       if(validxy(A)) A <- list(A) else
       stop("Argument A should be a list of lists, each containing vectors x,y")
     }
-    # determine value of 'eps' if missing
+    ## determine value of 'eps' if missing
     if(missing(eps) || missing(x0) || missing(y0)) {
       xr <- range(unlist(lapply(A, xrange)))
       yr <- range(unlist(lapply(A, yrange)))
@@ -150,31 +141,16 @@ polylineoffset <-
       if(missing(x0)) x0 <- mean(xr)
       if(missing(y0)) y0 <- mean(yr)
     }
-    switch(jointype,
-           square = {
-             # limit is ignored
-             limit <- lim <- 1
-           },
-           round = {
-             # limit is max tolerance (absolute distance)
-             if(missing(limit))
-               limit <- delta/1000
-             lim <- max(0.5, limit/eps)
-           },
-           miter = {
-               # limit is a multiple of delta
-             if(missing(limit))
-               limit <- 2
-             lim <- limit
-           })
-    # rescale and convert vertex coordinates to integers
-    A <- lapply(A, preprocess, eps=eps, x0=x0, y0=y0)
-    del <- delta/eps
+    # arc tolerance
+    arctol <- max(eps/4, arctol)
     # call clipper library
+    A <- ensuredouble(A)
     storage.mode(jt) <- storage.mode(et) <- "integer"
-    storage.mode(del) <- storage.mode(lim) <- "double"
-    ans <- .Call("Clineoffset", A, del, jt, et, lim)
-    ans <- lapply(ans, postprocess, eps=eps, x0=x0, y0=y0)
-    return(ans)
+    storage.mode(delta) <- storage.mode(miterlim) <-
+      storage.mode(arctol) <- "double"
+    storage.mode(x0) <- storage.mode(y0) <- storage.mode(eps) <- "double"
+    ans <- .Call("Clineoffset", A, delta, jt, et,
+                 miterlim, arctol, x0, y0, eps)
+    return(aspolygonlist(ans))
   }
 

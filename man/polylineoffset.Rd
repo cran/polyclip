@@ -10,9 +10,11 @@
  polylineoffset(A, delta,
          \dots,
          eps, x0, y0,
-         limit,
+         miterlim=2, arctol=abs(delta)/100,
          jointype=c("square", "round", "miter"),
-         endtype = c("butt", "square", "round"))
+         endtype = c("closedpolygon", "closedline",
+             "openbutt", "opensquare", "openround",
+             "closed", "butt", "square", "round"))
 }
 \arguments{
   \item{A}{Data specifying polygons. See Details.}
@@ -20,7 +22,7 @@
   \item{\dots}{Ignored.}
   \item{eps}{Spatial resolution for coordinates.}
   \item{x0,y0}{Spatial origin for coordinates.}
-  \item{limit}{Tolerance or threshold parameter: see Details.}
+  \item{miterlim,arctol}{Tolerance parameters: see Details.}
   \item{jointype}{
     Type of join operation to be performed at each vertex.
     See Details.
@@ -68,27 +70,33 @@
   The argument \code{endtype} determines what happens at the beginning
   and end of each line. See the Examples for illustrations.
   \itemize{
-    \item \code{endtype="butt"}: ends are squared off abruptly.
-    \item \code{endtype="square"}:
+    \item \code{endtype="closedpolygon"}: ends are joined together (using the
+    \code{jointype} value) and the path filled as a polygon.
+    \item \code{endtype="closedline"}: ends are joined together (using the
+    \code{jointype} value) and the path is filled as a polyline.
+    \item \code{endtype="openbutt"}: ends are squared off abruptly.
+    \item \code{endtype="opensquare"}:
       ends are squared off at distance \code{delta}.
-    \item \code{endtype="round"}: ends are replaced by a semicircular arc.
+    \item \code{endtype="openround"}: ends are replaced by a semicircular arc.
   }
+  The values \code{endtype="closed"}, \code{"butt"}, \code{"square"}
+  and \code{"round"} are deprecated; they are
+  equivalent to \code{endtype="closedpolygon"},
+  \code{"openbutt"}, \code{"opensquare"} and \code{"openround"}
+  respectively.
 
-  For vertices of each line, the argument \code{limit} determines the 
-  maximum permissible distance between the ideal result
-  and the approximate result that is returned.
+  The arguments \code{miterlim} and \code{arctol} are tolerances.
   \itemize{
-    \item \code{jointype="round"}: \code{limit} is the maximum
+    \item if \code{jointype="round"}, then \code{arctol} is the maximum
     permissible distance between the true circular arc and its
-    discretised approximation. The default is \code{limit=delta/1000}.
-    \item \code{jointype="square"}: \code{limit} is ignored;
-    no constraint applies.
-    \item \code{jointype="miter"}: \code{limit * delta} is the maximum
-    permissible displacement between the original vertex and the
+    discretised approximation. 
+    \item if \code{jointype="miter"}, then \code{miterlimit * delta}
+    is the maximum permissible displacement between the original vertex and the
     corresponding offset vertex if the circular arc were to be
-    omitted entirely. The default is \code{limit=2}
+    omitted entirely. The default is \code{miterlimit=2}
     which is also the minimum value.
   }
+
 
   \bold{Calculations are performed in integer arithmetic}
   after subtracting \code{x0,y0} from the coordinates,
@@ -104,17 +112,17 @@
   A <- list(list(x=c(4,8,8,2,6), y=c(3,3,8,8,6)))
 
   plot(c(0,10),c(0,10), type="n",
-        main="jointype=square, endtype=square", 
+        main="jointype=square, endtype=opensquare", 
         axes=FALSE, xlab="", ylab="")
   lines(A[[1]], col="grey", lwd=3)
-  C <- polylineoffset(A, 0.5, jointype="square", endtype="square")
+  C <- polylineoffset(A, 0.5, jointype="square", endtype="opensquare")
   polygon(C[[1]], lwd=3, border="blue")
 
   plot(c(0,10),c(0,10), type="n",
-        main="jointype=round, endtype=round", 
+        main="jointype=round, endtype=openround", 
         axes=FALSE, xlab="", ylab="")
   lines(A[[1]], col="grey", lwd=3)
-  C <- polylineoffset(A, 0.5, jointype="round", endtype="round")
+  C <- polylineoffset(A, 0.5, jointype="round", endtype="openround")
   polygon(C[[1]], lwd=3, border="blue")
 }
 \references{

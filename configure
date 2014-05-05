@@ -1941,7 +1941,7 @@ ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ex
 ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 
 long64=""
-name64="signed 64-bit integers (long64)"
+name64="signed 64-bit integers (cInt)"
 ac_ext=cpp
 ac_cpp='$CXXCPP $CPPFLAGS'
 ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
@@ -2907,7 +2907,7 @@ fi
 echo "     In src/clipper.h, ${name64}"
 echo "     will be declared as '${long64}'"
 ulong64=""
-uname64="unsigned 64-bit integers (ulong64)"
+uname64="unsigned 64-bit integers (cUInt)"
 ac_fn_cxx_check_type "$LINENO" "uint64_t" "ac_cv_type_uint64_t" "#include <stdint.h>
 "
 if test "x$ac_cv_type_uint64_t" = xyes; then :

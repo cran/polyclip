@@ -6,7 +6,7 @@ dnl Check for availability of 64-bit integer types in C++
 AC_LANG([C++])
 dnl Signed 64-bit integer 
 long64=""
-name64="signed 64-bit integers (long64)"
+name64="signed 64-bit integers (cInt)"
 AC_CHECK_TYPES([int64_t],[long64="int64_t"],[],[#include <stdint.h>])
 if test "${long64}" != ""; then
   POLYCLIP_LONG64="${long64}"
@@ -33,7 +33,7 @@ echo "     In src/clipper.h, ${name64}"
 echo "     will be declared as '${long64}'"
 dnl Unsigned 64-bit integer 
 ulong64=""
-uname64="unsigned 64-bit integers (ulong64)"
+uname64="unsigned 64-bit integers (cUInt)"
 AC_CHECK_TYPES([uint64_t],[ulong64="uint64_t"],[],[#include <stdint.h>])
 if test "${ulong64}" != ""; then
   POLYCLIP_ULONG64="${ulong64}" 

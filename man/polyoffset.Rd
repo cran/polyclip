@@ -2,7 +2,7 @@
 \alias{polyoffset}
 \title{Polygon Offset}
 \description{
-  Given a polygonal region, compute the offset region (guard region,
+  Given a polygonal region, compute the offset region (aka: guard region,
   buffer region, morphological dilation) formed by shifting the
   boundary outwards by a specified distance. 
 }
@@ -10,7 +10,7 @@
  polyoffset(A, delta,
          \dots,
          eps, x0, y0,
-         limit,
+         miterlim=2, arctol=abs(delta)/100,
          jointype=c("square", "round", "miter"))
 }
 \arguments{
@@ -19,7 +19,7 @@
   \item{\dots}{Ignored.}
   \item{eps}{Spatial resolution for coordinates.}
   \item{x0,y0}{Spatial origin for coordinates.}
-  \item{limit}{Tolerance or threshold parameter: see Details.}
+  \item{miterlim,arctol}{Tolerance parameters: see Details.}
   \item{jointype}{
     Type of join operation to be performed at each vertex.
     See Details.
@@ -62,25 +62,21 @@
     omitted entirely, or replaced by a single straight line.
   }
 
-  The argument \code{limit} determines the 
-  maximum permissible distance between the true circular arc
-  and the resulting polygon.
+  The arguments \code{miterlim} and \code{arctol} are tolerances.
   \itemize{
-    \item \code{jointype="round"}: \code{limit} is the maximum
+    \item if \code{jointype="round"}, then \code{arctol} is the maximum
     permissible distance between the true circular arc and its
-    discretised approximation. The default is \code{limit=delta/1000}.
-    \item \code{jointype="square"}: \code{limit} is ignored;
-    no constraint applies.
-    \item \code{jointype="miter"}: \code{limit * delta} is the maximum
-    permissible displacement between the original vertex and the
+    discretised approximation. 
+    \item if \code{jointype="miter"}, then \code{miterlimit * delta}
+    is the maximum permissible displacement between the original vertex and the
     corresponding offset vertex if the circular arc were to be
-    omitted entirely. The default is \code{limit=2}
+    omitted entirely. The default is \code{miterlimit=2}
     which is also the minimum value.
   }
 
   \bold{Calculations are performed in integer arithmetic}
   after subtracting \code{x0,y0} from the coordinates,
-  dividing by \code{eps}, and rounding to the nearest integer.
+  dividing by \code{eps}, and rounding to the nearest 64-bit integer.
   Thus, \code{eps} is the effective spatial resolution.
   The default values ensure reasonable accuracy.
 }
