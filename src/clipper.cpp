@@ -87,10 +87,17 @@ namespace ClipperLib {
   static cInt const loRange = 46340;
   static cInt const hiRange = 46340;
 #else
+/* ........ begin hack by Adrian .......... */
+  typedef cUInt ulong64;
   static cInt const loRange = 0x3FFFFFFF;
-  static cInt const hiRange = 0x3FFFFFFFFFFFFFFFLL;
-  typedef unsigned long long ulong64;
+  /*  Replace: static cInt const hiRange = 0x3FFFFFFFFFFFFFFFLL; */
+  static cInt const lower32bits =  0xFFFFFFFF;
+  static cInt const hiRange = (((cInt) 0x3FFFFFFF) << 32 | lower32bits);
+  /*  Replace: 0x8000000000000000; */
+  static cInt const eightball = ((cInt) 0x80000000) << 32;
+/* ........ end hack by Adrian .......... */
 #endif
+
 
 static double const pi = 3.141592653589793238;
 static double const two_pi = pi *2;
@@ -395,12 +402,12 @@ class Int128
           }
           divisor.lo >>= 1;
           if ((divisor.hi & 1) == 1)
-              divisor.lo |= 0x8000000000000000LL; 
+ 	    divisor.lo |= eightball;
           divisor.hi = (ulong64)divisor.hi >> 1;
 
           cntr.lo >>= 1;
           if ((cntr.hi & 1) == 1)
-              cntr.lo |= 0x8000000000000000LL; 
+	    cntr.lo |= eightball;
           cntr.hi >>= 1;
 
           while (cntr.hi != 0 || cntr.lo != 0)
@@ -413,12 +420,12 @@ class Int128
               }
               divisor.lo >>= 1;
               if ((divisor.hi & 1) == 1)
-                  divisor.lo |= 0x8000000000000000LL; 
+		divisor.lo |= eightball;
               divisor.hi >>= 1;
 
               cntr.lo >>= 1;
               if ((cntr.hi & 1) == 1)
-                  cntr.lo |= 0x8000000000000000LL; 
+		cntr.lo |= eightball;
               cntr.hi >>= 1;
           }
           if (negate) result = -result;
@@ -452,11 +459,11 @@ Int128 Int128Mul (cInt lhs, cInt rhs)
 
   if (lhs < 0) lhs = -lhs;
   ulong64 int1Hi = ulong64(lhs) >> 32;
-  ulong64 int1Lo = ulong64(lhs & 0xFFFFFFFF);
+  ulong64 int1Lo = ulong64(lhs & lower32bits);
 
   if (rhs < 0) rhs = -rhs;
   ulong64 int2Hi = ulong64(rhs) >> 32;
-  ulong64 int2Lo = ulong64(rhs & 0xFFFFFFFF);
+  ulong64 int2Lo = ulong64(rhs & lower32bits);
 
   //nb: see comments in clipper.pas
   ulong64 a = int1Hi * int2Hi;
@@ -470,7 +477,7 @@ Int128 Int128Mul (cInt lhs, cInt rhs)
   if (tmp.lo < b) tmp.hi++;
   if (negate) tmp = -tmp;
   return tmp;
-};
+}
 #endif
 
 //------------------------------------------------------------------------------
