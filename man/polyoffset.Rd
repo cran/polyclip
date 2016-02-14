@@ -82,7 +82,7 @@
 }
 \author{Angus Johnson.
   Ported to \R by Adrian Baddeley
-  \email{Adrian.Baddeley@uwa.edu.au}.
+  \email{Adrian.Baddeley@curtin.edu.au}.
 }
 \examples{
   A <- list(list(x=c(4,8,8,2,6), y=c(3,3,8,8,6)))

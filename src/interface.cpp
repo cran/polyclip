@@ -55,6 +55,103 @@ void ScaleFromPath(ClipperLib::Path &p, double *x, double *y, int nmax, int *n,
 }
 
 extern "C" {
+  SEXP Csimplify(SEXP A,
+		 SEXP pft,
+		 SEXP X0,
+		 SEXP Y0,
+		 SEXP Eps) {
+    int nA, i, nAi, m, mi, mitrue;
+    double *x, *y, *xx, *yy;
+    SEXP Ai = R_NilValue;
+    SEXP out, outi, xouti, youti;
+    int pftcode;
+    PolyFillType filltype;
+    double x0, y0, eps;
+
+    // protect arguments from garbage collector    
+    PROTECT(A   = AS_LIST(A));
+    PROTECT(pft  = AS_INTEGER(pft));
+    PROTECT(X0  = AS_NUMERIC(X0));
+    PROTECT(Y0  = AS_NUMERIC(Y0));
+    PROTECT(Eps = AS_NUMERIC(Eps));
+    // that's 5 arguments
+
+    // number of polygons
+    nA = LENGTH(A);
+
+    // Initialise object containing n polygons
+    Paths polyA(nA);
+
+    // Get scale parameters
+    x0 = *(NUMERIC_POINTER(X0));
+    y0 = *(NUMERIC_POINTER(Y0));
+    eps = *(NUMERIC_POINTER(Eps));
+
+    // copy data
+    for(i = 0; i < nA; i++) {
+      Ai = VECTOR_ELT(A, i);
+      nAi = LENGTH(VECTOR_ELT(Ai, 0));
+      x = NUMERIC_POINTER(VECTOR_ELT(Ai, 0));
+      y = NUMERIC_POINTER(VECTOR_ELT(Ai, 1));
+      ScaleToPath(x, y, nAi, polyA[i], x0, y0, eps);
+    }
+
+    // interpret clipping parameters
+    pftcode = *(INTEGER_POINTER(pft));
+    switch(pftcode) {
+    case 1: 
+      filltype = pftEvenOdd; 
+      break;
+    case 2:
+      filltype = pftNonZero;
+      break;
+    case 3:
+      filltype = pftPositive;
+      break;
+    case 4:
+      filltype = pftNegative;
+      break;
+    default: 
+      error("polyclip: unrecognised code for fill type A");
+    }
+
+    // simplify polygon;
+    Paths result;
+    SimplifyPolygons(polyA, result, filltype);
+
+    // number of polygons
+    m = result.size();
+    
+    // initialise output list
+    PROTECT(out  = NEW_LIST(m));
+    
+    // copy data
+    if(m > 0) {
+      for(i = 0; i < m; i++) {
+	mi = result[i].size();
+	// Allocate space for output
+	PROTECT(outi = NEW_LIST(2));
+	PROTECT(xouti = NEW_NUMERIC(mi));
+	PROTECT(youti = NEW_NUMERIC(mi));
+	xx = NUMERIC_POINTER(xouti);
+	yy = NUMERIC_POINTER(youti);
+	// copy to output space
+	ScaleFromPath(result[i], xx, yy, mi, &mitrue, x0, y0, eps);
+	// Put vectors into list
+	SET_VECTOR_ELT(outi, 0, xouti);
+	SET_VECTOR_ELT(outi, 1, youti);
+	SET_VECTOR_ELT(out, i, outi);
+      }
+    }
+
+    UNPROTECT(6 + 3*m); // 5 arguments + out + m * (outi, xouti, youti)
+    return(out);
+  }
+}
+
+// -----------------------------------------------------------------
+
+extern "C" {
   SEXP Cclipbool(SEXP A,
 		 SEXP B,
 		 SEXP pftA,

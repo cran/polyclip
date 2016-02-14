@@ -91,9 +91,14 @@
   Thus, \code{eps} is the effective spatial resolution.
   The default values ensure reasonable accuracy.
 }
+\seealso{
+  \code{\link{polysimplify}},
+  \code{\link{polyoffset}},
+  \code{\link{polylineoffset}}
+}
 \author{Angus Johnson.
   Ported to \R by Adrian Baddeley
-  \email{Adrian.Baddeley@uwa.edu.au}.
+  \email{Adrian.Baddeley@curtin.edu.au}.
 }
 \examples{
   A <- list(list(x=1:10, y=c(1:5,5:1)))

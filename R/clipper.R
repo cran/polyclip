@@ -3,7 +3,7 @@
 #
 # Interface to Clipper C++ code
 #
-#  $Revision: 1.9 $ $Date: 2014/05/05 10:31:06 $
+#  $Revision: 1.10 $ $Date: 2016/02/13 09:56:34 $
 #
 
 validxy <- function(P) {
@@ -24,6 +24,38 @@ ensurexydouble <- function(P) lapply(P[c("x", "y")],
 ensuredouble <- function(A) lapply(A, ensurexydouble)
 
 aspolygonlist <- function(A) lapply(A, "names<-", value=c("x", "y"))
+
+polysimplify <-
+  function(A,
+           ...,
+           eps, x0, y0,
+           filltype=c("evenodd", "nonzero", "positive", "negative")
+           ) {
+    # validate parameters and convert to integer codes
+    filltype <- match.arg(filltype)
+    pft <- match(filltype, c("evenodd", "nonzero", "positive", "negative"))
+    # validate polygon
+    if(!validpoly(A)) {
+      if(validxy(A)) A <- list(A) else
+      stop("Argument A should be a list of lists, each containing vectors x,y")
+    }
+    # determine value of 'eps' if missing
+    if(missing(eps) || missing(x0) || missing(y0)) {
+      xr <- range(range(unlist(lapply(A, xrange))))
+      yr <- range(range(unlist(lapply(A, yrange))))
+      if(missing(eps)) eps <- max(diff(xr), diff(yr))/1e9
+      if(missing(x0)) x0 <- mean(xr)
+      if(missing(y0)) y0 <- mean(yr)
+    } 
+    # call clipper library on each component path
+    result <- list()
+    A <- ensuredouble(A)
+    storage.mode(pft) <- "integer"
+    storage.mode(x0) <- storage.mode(y0) <- storage.mode(eps) <- "double"
+    result <- .Call("Csimplify",
+                    A, pft, x0, y0, eps)
+    return(aspolygonlist(result))
+  }
 
 polyclip <-
   function(A, B, 
