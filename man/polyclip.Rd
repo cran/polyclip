@@ -94,7 +94,8 @@
 \seealso{
   \code{\link{polysimplify}},
   \code{\link{polyoffset}},
-  \code{\link{polylineoffset}}
+  \code{\link{polylineoffset}},
+  \code{\link{polyminkowski}}
 }
 \author{Angus Johnson.
   Ported to \R by Adrian Baddeley

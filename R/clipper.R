@@ -3,7 +3,7 @@
 #
 # Interface to Clipper C++ code
 #
-#  $Revision: 1.10 $ $Date: 2016/02/13 09:56:34 $
+#  $Revision: 1.13 $ $Date: 2016/03/24 00:52:57 $
 #
 
 validxy <- function(P) {
@@ -186,3 +186,41 @@ polylineoffset <-
     return(aspolygonlist(ans))
   }
 
+polyminkowski <-
+  function(A, B, 
+           ...,
+           eps, x0, y0,
+           closed=TRUE
+           ) {
+    # validate parameters and convert to integer codes
+    closed <- as.logical(closed)
+    # validate polygons/paths
+    if(!validpoly(A)) {
+      if(validxy(A)) A <- list(A) else
+      stop("Argument A should be a list of lists, each containing vectors x,y")
+    }
+    if(length(A) > 1)
+      stop("Not implemented when A consists of more than one polygon")
+    if(!validpoly(B)) {
+      if(validxy(B)) B <- list(B) else
+      stop("Argument B should be a list of lists, each containing vectors x,y")
+    }
+    # determine value of 'eps' if missing
+    if(missing(eps) || missing(x0) || missing(y0)) {
+      xr <- range(range(unlist(lapply(A, xrange))))
+      yr <- range(range(unlist(lapply(A, yrange))))
+      xr <- range(xr, range(unlist(lapply(B, xrange))))
+      yr <- range(yr, range(unlist(lapply(B, yrange))))
+      if(missing(eps)) eps <- max(diff(xr), diff(yr))/1e9
+      if(missing(x0)) x0 <- xr[1]
+      if(missing(y0)) y0 <- yr[1] - diff(yr)/16
+    }
+    # call clipper library on each component path
+    A <- ensuredouble(A)
+    B <- ensuredouble(B)
+    storage.mode(x0) <- storage.mode(y0) <- storage.mode(eps) <- "double"
+    storage.mode(closed) <- "logical"
+    result <- .Call("Cminksum",
+                    A, B, closed, x0, y0, eps)
+    return(aspolygonlist(result))
+  }

@@ -6,9 +6,10 @@
 .onLoad <- function(...) {} 
 
 .onAttach <- function(libname, pkgname) {
-  vs <- read.dcf(file=system.file("DESCRIPTION", package="polyclip"),
-                 fields="Version")
-  msg <- paste("polyclip", vs)
+  dfile <- system.file("DESCRIPTION", package="polyclip")
+  ver <- read.dcf(file=dfile, fields="Version")
+  clipperbuild <- read.dcf(file=dfile, fields="Note")
+  msg <- paste("polyclip", ver, clipperbuild)
   packageStartupMessage(msg)
   invisible(NULL)
 }

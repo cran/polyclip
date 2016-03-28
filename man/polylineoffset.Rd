@@ -108,6 +108,12 @@
   Ported to \R by Adrian Baddeley
   \email{Adrian.Baddeley@curtin.edu.au}.
 }
+\seealso{
+  \code{\link{polyoffset}},
+  \code{\link{polysimplify}},
+  \code{\link{polyclip}},
+  \code{\link{polyminkowski}}
+}
 \examples{
   A <- list(list(x=c(4,8,8,2,6), y=c(3,3,8,8,6)))
 

@@ -86,7 +86,8 @@
 \seealso{
   \code{\link{polyclip}},
   \code{\link{polyoffset}},
-  \code{\link{polylineoffset}}
+  \code{\link{polylineoffset}},
+  \code{\link{polyminkowski}}
 }
 \examples{
   theta <- 2 * pi * (0:5) * 2/5

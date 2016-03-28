@@ -548,3 +548,96 @@ extern "C" {
   }
 }
 
+// Minkowski sum of polygon with **path(s)** 
+
+extern "C" {
+  SEXP Cminksum(SEXP A,            // list(list(x,y)) : polygon
+		SEXP B,            // list(list(x,y), list(x,y), ....)
+		SEXP clo,          // whether paths in B are closed
+		SEXP X0,
+		SEXP Y0,
+		SEXP Eps) {
+    int nB, i, nBi, nA0, m, mi, mitrue;
+    double *x, *y, *xx, *yy;
+    SEXP A0 = R_NilValue;
+    SEXP Bi = R_NilValue;
+    SEXP out, outi, xouti, youti;
+    bool closed;
+    double x0, y0, eps;
+    Path pathA;
+
+    // protect arguments from garbage collector    
+    PROTECT(A   = AS_LIST(A));
+    PROTECT(B   = AS_LIST(B));
+    PROTECT(clo = AS_LOGICAL(clo));
+    PROTECT(X0  = AS_NUMERIC(X0));
+    PROTECT(Y0  = AS_NUMERIC(Y0));
+    PROTECT(Eps = AS_NUMERIC(Eps));
+    // that's 6 arguments
+
+    // Get scale parameters
+    x0 = *(NUMERIC_POINTER(X0));
+    y0 = *(NUMERIC_POINTER(Y0));
+    eps = *(NUMERIC_POINTER(Eps));
+
+    // logical value specifying whether paths in B should be closed
+    closed = *(LOGICAL_POINTER(clo));
+
+    // copy data from A
+    A0 = VECTOR_ELT(A, 0);
+    nA0 = LENGTH(VECTOR_ELT(A0, 0));
+    x = NUMERIC_POINTER(VECTOR_ELT(A0, 0));
+    y = NUMERIC_POINTER(VECTOR_ELT(A0, 1));
+    ScaleToPath(x, y, nA0, pathA, x0, y0, eps);
+
+    // number of polygons in B
+    nB = LENGTH(B);
+    // Initialise object representing nB polygons
+    Paths pathsB(nB);
+
+    // copy data from B
+    for(i = 0; i < nB; i++) {
+      Bi = VECTOR_ELT(B, i);
+      nBi = LENGTH(VECTOR_ELT(Bi, 0));
+      x = NUMERIC_POINTER(VECTOR_ELT(Bi, 0));
+      y = NUMERIC_POINTER(VECTOR_ELT(Bi, 1));
+      ScaleToPath(x, y, nBi, pathsB[i], x0, y0, eps);
+    }
+
+    // hit it
+    Paths result;
+    MinkowskiSum(pathA, pathsB, result, closed);
+
+    // number of polygons
+    m = result.size();
+    
+    // initialise output list
+    PROTECT(out  = NEW_LIST(m));
+
+    // adjust origin: (x0,y0) were subtracted from both A and B
+    x0 = 2.0 * x0;
+    y0 = 2.0 * y0;
+
+    // copy data
+    if(m > 0) {
+      for(i = 0; i < m; i++) {
+	mi = result[i].size();
+	// Allocate space for output
+	PROTECT(outi = NEW_LIST(2));
+	PROTECT(xouti = NEW_NUMERIC(mi));
+	PROTECT(youti = NEW_NUMERIC(mi));
+	xx = NUMERIC_POINTER(xouti);
+	yy = NUMERIC_POINTER(youti);
+	// copy to output space
+	ScaleFromPath(result[i], xx, yy, mi, &mitrue, x0, y0, eps);
+	// Put vectors into list
+	SET_VECTOR_ELT(outi, 0, xouti);
+	SET_VECTOR_ELT(outi, 1, youti);
+	SET_VECTOR_ELT(out, i, outi);
+      }
+    }
+
+    UNPROTECT(7 + 3*m); // 6 arguments + out + m * (outi, xouti, youti)
+    return(out);
+  }
+}
