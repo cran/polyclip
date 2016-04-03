@@ -1,6 +1,6 @@
 Package: polyclip
-Version: 1.5-1
-Date: 2016-03-28
+Version: 1.5-6
+Date: 2016-04-02
 Title: Polygon Clipping
 Authors@R: c(person("Angus", "Johnson", role = "aut", 
    	    comment="C++ original, http://www.angusj.com/delphi/clipper.php"),
@@ -19,10 +19,10 @@ LazyLoad: true
 ByteCompile: true
 Note: built from Clipper C++ version 6.4.0
 NeedsCompilation: yes
-Packaged: 2016-03-28 11:02:27 UTC; adrian
+Packaged: 2016-04-02 03:34:42 UTC; adrian
 Author: Angus Johnson [aut] (C++ original,
     http://www.angusj.com/delphi/clipper.php),
   Adrian Baddeley [aut, trl, cre],
   Brian D. Ripley [ctb]
 Repository: CRAN
-Date/Publication: 2016-03-28 14:46:56
+Date/Publication: 2016-04-03 00:26:40

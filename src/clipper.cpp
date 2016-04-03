@@ -2681,7 +2681,7 @@ void Clipper::ProcessHorizontal(TEdge *horzEdge)
 
   MaximaList::const_iterator maxIt;
   MaximaList::const_reverse_iterator maxRit;
-  if (m_Maxima.size() > 0)
+  if (!m_Maxima.empty())
   {
       //get the first maxima in range (X) ...
       if (dir == dLeftToRight)
@@ -2694,8 +2694,9 @@ void Clipper::ProcessHorizontal(TEdge *horzEdge)
       else
       {
           maxRit = m_Maxima.rbegin();
-          while (maxRit != m_Maxima.rend() && *maxRit > horzEdge->Bot.X) maxRit++;
-          if (maxRit != m_Maxima.rend() && *maxRit <= eLastHorz->Top.X)
+	  // reverse "!=" to work around a defect in early compilers
+          while(m_Maxima.rend() != maxRit && *maxRit > horzEdge->Bot.X) maxRit++;
+          if (m_Maxima.rend() != maxRit && *maxRit <= eLastHorz->Top.X)
               maxRit = m_Maxima.rend();
       }
   }
@@ -2713,7 +2714,7 @@ void Clipper::ProcessHorizontal(TEdge *horzEdge)
         //this code block inserts extra coords into horizontal edges (in output
         //polygons) whereever maxima touch these horizontal edges. This helps
         //'simplifying' polygons (ie if the Simplify property is set).
-        if (m_Maxima.size() > 0)
+        if (!m_Maxima.empty())
         {
             if (dir == dLeftToRight)
             {
@@ -2726,7 +2727,8 @@ void Clipper::ProcessHorizontal(TEdge *horzEdge)
             }
             else
             {
-                while (maxRit != m_Maxima.rend() && *maxRit > e->Curr.X)
+	        // reverse "!=" to work around a defect in early compilers
+                while (m_Maxima.rend() != maxRit && *maxRit > e->Curr.X)
                 {
                   if (horzEdge->OutIdx >= 0 && !IsOpen)
                     AddOutPt(horzEdge, IntPoint(*maxRit, horzEdge->Bot.Y));
