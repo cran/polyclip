@@ -3,7 +3,7 @@
 #
 # Interface to Clipper C++ code
 #
-#  $Revision: 1.13 $ $Date: 2016/03/24 00:52:57 $
+#  $Revision: 1.14 $ $Date: 2018/03/01 13:35:53 $
 #
 
 validxy <- function(P) {
@@ -53,8 +53,7 @@ polysimplify <-
     storage.mode(pft) <- "integer"
     storage.mode(x0) <- storage.mode(y0) <- storage.mode(eps) <- "double"
     result <- .Call("Csimplify",
-                    A, pft, x0, y0, eps,
-                    PACKAGE = "polyclip")
+                    A, pft, x0, y0, eps)
     return(aspolygonlist(result))
   }
 
@@ -99,8 +98,7 @@ polyclip <-
     storage.mode(x0) <- storage.mode(y0) <- storage.mode(eps) <- "double"
     ans <- .Call("Cclipbool",
                  A, B, pftA, pftB, ct,
-                 x0, y0, eps,
-                 PACKAGE = "polyclip")
+                 x0, y0, eps)
     return(aspolygonlist(ans))
   }
 
@@ -136,8 +134,7 @@ polyoffset <-
       storage.mode(miterlim) <- storage.mode(arctol) <- "double"
     storage.mode(x0) <- storage.mode(y0) <- storage.mode(eps) <- "double"
     ans <- .Call("Cpolyoffset", A, delta, jt,
-                 miterlim, arctol, x0, y0, eps,
-                 PACKAGE = "polyclip")
+                 miterlim, arctol, x0, y0, eps)
     return(aspolygonlist(ans))
   }
 
@@ -185,8 +182,7 @@ polylineoffset <-
       storage.mode(arctol) <- "double"
     storage.mode(x0) <- storage.mode(y0) <- storage.mode(eps) <- "double"
     ans <- .Call("Clineoffset", A, delta, jt, et,
-                 miterlim, arctol, x0, y0, eps,
-                 PACKAGE = "polyclip")
+                 miterlim, arctol, x0, y0, eps)
     return(aspolygonlist(ans))
   }
 
@@ -225,7 +221,31 @@ polyminkowski <-
     storage.mode(x0) <- storage.mode(y0) <- storage.mode(eps) <- "double"
     storage.mode(closed) <- "logical"
     result <- .Call("Cminksum",
-                    A, B, closed, x0, y0, eps,
-                    PACKAGE = "polyclip")
+                    A, B, closed, x0, y0, eps)
     return(aspolygonlist(result))
+  }
+
+pointinpolygon <-
+  function(P, A, eps, x0, y0) {
+    # validate arguments
+    if(!validxy(P))
+      stop("Argument P should be a list containing vectors x,y")
+    if(!validxy(A))
+      stop("Argument A should be a list containing vectors x,y")
+    # determine value of 'eps' if missing
+    if(missing(eps) || missing(x0) || missing(y0)) {
+      xr <- xrange(A)
+      yr <- yrange(A)
+      if(missing(eps)) eps <- max(diff(xr), diff(yr))/1e9
+      if(missing(x0)) x0 <- mean(xr)
+      if(missing(y0)) y0 <- mean(yr)
+    } 
+    # call clipper library
+    A <- ensurexydouble(A)
+    P <- ensurexydouble(P)
+    storage.mode(x0) <- storage.mode(y0) <- storage.mode(eps) <- "double"
+    ans <- .Call("Cpiptest",
+                 P, A,
+                 x0, y0, eps)
+    return(ans)
   }
