@@ -1,4 +1,4 @@
-b97062e0aa15faa9a074dbf086fc4c4c *DESCRIPTION
+bb6bad09aa4e751f1677af5f2d55b88e *DESCRIPTION
 c3cd0adc7aa8e5dbc8c40857986ee859 *NAMESPACE
 dee054bf03363f13a034c8b7c319d560 *R/First.R
 535edb716a3e0f0a6583963d3f611584 *R/clipper.R
@@ -17,4 +17,4 @@ c2e324c0595e64cf906d0b9a27a7c119 *man/polysimplify.Rd
 0258d3c815a6d7b851b2d1dfbeb2afc1 *src/clipper.cpp
 1c0c653cf73eeeb7a7a684f5c5b20b58 *src/clipper.h
 f39cf6255e43cc3a0f8d536aae965d0b *src/init.c
-4778334c52c8cea97ce8debdb731265c *src/interface.cpp
+0e50ef71b20acd0560a25f0b5e460d9a *src/interface.cpp
