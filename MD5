@@ -1,10 +1,10 @@
-bb6bad09aa4e751f1677af5f2d55b88e *DESCRIPTION
+7f75a7c3f7401a55195a91abe4291e0b *DESCRIPTION
 c3cd0adc7aa8e5dbc8c40857986ee859 *NAMESPACE
 dee054bf03363f13a034c8b7c319d560 *R/First.R
 535edb716a3e0f0a6583963d3f611584 *R/clipper.R
 14c7a9772d3b48055cbd8ddd053abbf3 *cleanup
-f4b99644d7c5d046141b42e7ddc56e44 *configure
-28baa7b70ed843541b53a19f505c548f *configure.ac
+f8c3e579449669eeb854ae58a9975a16 *configure
+d8064679a0247901b8e7c8c94840b791 *configure.ac
 d41d8cd98f00b204e9800998ecf8427e *configure.win
 eb4af1e568c5b717a2a731ed417cf5f9 *man/pointinpolygon.Rd
 215848c9be19696c6ba4bc09eff71cc8 *man/polyclip.Rd
@@ -15,6 +15,6 @@ c2e324c0595e64cf906d0b9a27a7c119 *man/polysimplify.Rd
 42ab722414acc559feafbb639701bce3 *src/Makevars.in
 7f5db02b9f569e12d0f2df0ed1b908bb *src/Makevars.win
 0258d3c815a6d7b851b2d1dfbeb2afc1 *src/clipper.cpp
-1c0c653cf73eeeb7a7a684f5c5b20b58 *src/clipper.h
+4d17faf8f89d71d1bbc47e04ef4ea84e *src/clipper.h
 f39cf6255e43cc3a0f8d536aae965d0b *src/init.c
 0e50ef71b20acd0560a25f0b5e460d9a *src/interface.cpp
