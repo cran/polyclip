@@ -1,10 +1,11 @@
-7f75a7c3f7401a55195a91abe4291e0b *DESCRIPTION
-c3cd0adc7aa8e5dbc8c40857986ee859 *NAMESPACE
+ceb1b7a29ce92dfd1461287bf002a99b *DESCRIPTION
+37524bbc5d7fe03aea01ca24504b3e10 *NAMESPACE
+f48e552f282286a1d3f688b1987b2d05 *NEWS
 dee054bf03363f13a034c8b7c319d560 *R/First.R
-535edb716a3e0f0a6583963d3f611584 *R/clipper.R
+64128cc4b6fbf67371182525360bbfcf *R/clipper.R
 14c7a9772d3b48055cbd8ddd053abbf3 *cleanup
-f8c3e579449669eeb854ae58a9975a16 *configure
-d8064679a0247901b8e7c8c94840b791 *configure.ac
+65f75b1af4a71e907c134dab0882755e *configure
+d39c7dc85348151cdcd526edfc0be33e *configure.ac
 d41d8cd98f00b204e9800998ecf8427e *configure.win
 eb4af1e568c5b717a2a731ed417cf5f9 *man/pointinpolygon.Rd
 215848c9be19696c6ba4bc09eff71cc8 *man/polyclip.Rd
