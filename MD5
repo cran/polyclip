@@ -1,14 +1,14 @@
-8853e0622d9f66f1cf3c51de6c36e01c *DESCRIPTION
+9c3f7cc90aa7c36a5c5ef9cfd0bdb5f7 *DESCRIPTION
 37524bbc5d7fe03aea01ca24504b3e10 *NAMESPACE
-ee09331bcda4fe0fa5083a132c2d0891 *NEWS
+73665bb9596fea5fa59789e108182e35 *NEWS
 dee054bf03363f13a034c8b7c319d560 *R/First.R
-64128cc4b6fbf67371182525360bbfcf *R/clipper.R
+0592a5daa3d264800fe805263889a536 *R/clipper.R
 14c7a9772d3b48055cbd8ddd053abbf3 *cleanup
 0f418f25e1cd25ed7d0fed7f487d096d *configure
 a1b9549d277710c34c9fd57e2eb5d453 *configure.ac
 d41d8cd98f00b204e9800998ecf8427e *configure.win
 eb4af1e568c5b717a2a731ed417cf5f9 *man/pointinpolygon.Rd
-215848c9be19696c6ba4bc09eff71cc8 *man/polyclip.Rd
+925b3b53c4fd6898419d892476942094 *man/polyclip.Rd
 42c32d9ce87e76d6415660bcce8890c0 *man/polylineoffset.Rd
 c30b54f6e3c04926235a721032749448 *man/polyminkowski.Rd
 3077cd8984bb169ece92b0aba2764d53 *man/polyoffset.Rd
@@ -17,5 +17,5 @@ c2e324c0595e64cf906d0b9a27a7c119 *man/polysimplify.Rd
 7f5db02b9f569e12d0f2df0ed1b908bb *src/Makevars.win
 0258d3c815a6d7b851b2d1dfbeb2afc1 *src/clipper.cpp
 4d17faf8f89d71d1bbc47e04ef4ea84e *src/clipper.h
-f39cf6255e43cc3a0f8d536aae965d0b *src/init.c
-0e50ef71b20acd0560a25f0b5e460d9a *src/interface.cpp
+2eef7d16e5ddda371b5fa24518f4cfbb *src/init.c
+6df32a821e4dd8121f078b919ec9d72b *src/interface.cpp

@@ -1,4 +1,13 @@
 
+        CHANGES IN polyclip VERSION 1.10-0
+
+SIGNIFICANT USER-VISIBLE CHANGES
+
+    o polyclip
+    Now handles polygonal lines as well as closed polygons.
+    New argument 'closed' specifies whether A is a closed polygon.
+    [Thanks to Paul Murrell.]
+
         CHANGES IN polyclip VERSION 1.9-1
 
 SIGNIFICANT USER-VISIBLE CHANGES
