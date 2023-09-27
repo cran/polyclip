@@ -1,11 +1,11 @@
-05e335e88bb4b85a02ba96ba22a149ce *DESCRIPTION
+c5d777727a191dd14754a73868ab54e9 *DESCRIPTION
 37524bbc5d7fe03aea01ca24504b3e10 *NAMESPACE
 081fd4ca79a615f836656d23b676dd41 *NEWS
 dee054bf03363f13a034c8b7c319d560 *R/First.R
 0592a5daa3d264800fe805263889a536 *R/clipper.R
 14c7a9772d3b48055cbd8ddd053abbf3 *cleanup
-0f418f25e1cd25ed7d0fed7f487d096d *configure
-a1b9549d277710c34c9fd57e2eb5d453 *configure.ac
+1143d17b3806977df6f5e8fa8e297ae0 *configure
+9b8f4b74fe34d4702284f8c8f381786c *configure.ac
 d41d8cd98f00b204e9800998ecf8427e *configure.win
 9b9e45c3355264a05d639cad559ead1c *man/pointinpolygon.Rd
 4878a3ee63842c610bf449228c80d000 *man/polyclip.Rd
@@ -13,8 +13,8 @@ d41d8cd98f00b204e9800998ecf8427e *configure.win
 c30b54f6e3c04926235a721032749448 *man/polyminkowski.Rd
 339783c5516d91b1809e413aa50438a6 *man/polyoffset.Rd
 c2e324c0595e64cf906d0b9a27a7c119 *man/polysimplify.Rd
-42ab722414acc559feafbb639701bce3 *src/Makevars.in
-7f5db02b9f569e12d0f2df0ed1b908bb *src/Makevars.win
+b7c71e8342f4e00dedf44ef2c28a9c2e *src/Makevars.in
+a38081ddab5ba9a0edb9d78ac57c71d0 *src/Makevars.win
 deb58637e443ce2ba76f69cb5ceaa013 *src/clipper.cpp
 4d17faf8f89d71d1bbc47e04ef4ea84e *src/clipper.h
 2eef7d16e5ddda371b5fa24518f4cfbb *src/init.c
