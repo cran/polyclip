@@ -1,6 +1,6 @@
 Package: polyclip
-Version: 1.10-6
-Date: 2023-09-27
+Version: 1.10-7
+Date: 2024-07-23
 Title: Polygon Clipping
 Authors@R: c(person("Angus", "Johnson", role = "aut", 
    	    comment="C++ original, http://www.angusj.com/delphi/clipper.php"),
@@ -13,17 +13,17 @@ Authors@R: c(person("Angus", "Johnson", role = "aut",
 	     person("Ege", "Rubak", role="ctb"),
 	     person("Mark", "Padgham", role="ctb"))
 Maintainer: Adrian Baddeley <Adrian.Baddeley@curtin.edu.au>
-Depends: R (>= 3.0.0)
+Depends: R (>= 3.5.0)
 Description: R port of Angus Johnson's open source library 'Clipper'. Performs polygon clipping operations (intersection, union, set minus, set difference) for polygonal regions of arbitrary complexity, including holes. Computes offset polygons (spatial buffer zones, morphological dilations, Minkowski dilations) for polygonal regions and polygonal lines. Computes Minkowski Sum of general polygons. There is a function for removing self-intersections from polygon data.
 License: BSL
-URL: http://www.angusj.com/delphi/clipper.php,
+URL: https://www.angusj.com,
         https://sourceforge.net/projects/polyclipping,
         https://github.com/baddstats/polyclip
 BugReports: https://github.com/baddstats/polyclip/issues
 ByteCompile: true
 Note: built from Clipper C++ version 6.4.0
 NeedsCompilation: yes
-Packaged: 2023-09-27 11:07:23 UTC; adrian
+Packaged: 2024-07-22 23:24:18 UTC; adrian
 Author: Angus Johnson [aut] (C++ original,
     http://www.angusj.com/delphi/clipper.php),
   Adrian Baddeley [aut, trl, cre],
@@ -34,4 +34,4 @@ Author: Angus Johnson [aut] (C++ original,
   Ege Rubak [ctb],
   Mark Padgham [ctb]
 Repository: CRAN
-Date/Publication: 2023-09-27 11:40:06 UTC
+Date/Publication: 2024-07-23 06:10:02 UTC
